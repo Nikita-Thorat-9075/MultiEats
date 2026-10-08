@@ -13,9 +13,10 @@ const useUrl = !!process.env.DATABASE_URL;
     if (!ex.rowCount) { await admin.query(`CREATE DATABASE "${dbName}"`); console.log('Created database', dbName); }
     await admin.end();
   }
-  if (useUrl) {
-    console.warn('WARNING: DATABASE_URL is set. Running schema.sql will DROP all tables and wipe the cloud database!');
-  }
+     if (useUrl && process.env.ALLOW_WIPE !== 'yes') {
+     console.error('Refusing to wipe the cloud database. Set ALLOW_WIPE=yes only if you really want this.');
+     process.exit(1);
+   }
   const c = new Client(useUrl
     ? { connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }
     : { ...cfg, database: dbName });
